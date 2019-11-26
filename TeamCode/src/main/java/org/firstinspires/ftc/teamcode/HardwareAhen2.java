@@ -33,12 +33,16 @@ package org.firstinspires.ftc.teamcode;
 //import com.disnodeteam.dogecv.DogeCV;
 //import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
 //import com.disnodeteam.dogecv.detectors.roverrukus.SamplingOrderDetector;
+import android.app.Activity;
+import android.view.View;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -78,19 +82,25 @@ public class HardwareAhen2
     public DcMotor  frontRight  = null;
     public DcMotor  backLeft    = null;
     public DcMotor  backRight   = null;
-    public DcMotor foundationMotor = null;
-    public DcMotor linearSlide = null;
-    public Servo claw1 = null;
-    public Servo claw2 = null;
+    public DcMotor tray = null;
+    public DcMotor lift = null;
+    public Servo clawLeft = null;
+    public Servo clawRight = null;
+    public Servo  autoServo          = null;
 //    public DcMotor  lift        = null;
 
 //    //ModernRoboticsI2cRangeSensor range;
-//    IntegratingGyroscope gyro;
-//    ModernRoboticsI2cGyro modernRoboticsI2cGyro;
+    IntegratingGyroscope gyro;
+    ModernRoboticsI2cGyro modernRoboticsI2cGyro;
 //
 //    IntegratingGyroscope gyro2;
 //    ModernRoboticsI2cGyro modernRoboticsI2cGyro2;
-//    //public DigitalChannel digitalTouch;
+//    public DigitalChannel digitalTouch;
+    ColorSensor sensorColor;
+    DistanceSensor sensorDistance;
+    ColorSensor sensorColor2;
+    DistanceSensor sensorDistance2;
+
 //
 //
 //    public Servo sampling = null;
@@ -118,40 +128,45 @@ public class HardwareAhen2
         frontRight = hwMap.get(DcMotor.class, "FrontRight");
         backLeft  = hwMap.get(DcMotor.class, "BackLeft");
         backRight = hwMap.get(DcMotor.class, "BackRight");
-        foundationMotor = hwMap.get(DcMotor.class, "foundation");
-        linearSlide = hwMap.get(DcMotor.class, "linearSlide");
-        claw1 = hwMap.get(Servo.class, "claw1");
-        claw2 = hwMap.get(Servo.class, "claw2");
+        tray = hwMap.get(DcMotor.class, "tray");
+        lift = hwMap.get(DcMotor.class, "lift");
+        clawLeft = hwMap.get(Servo.class, "clawLeft");
+        clawRight = hwMap.get(Servo.class, "clawRight");
+        autoServo = hwMap.get(Servo.class, "autoServo");
 //        lift = hwMap.get(DcMotor.class, "Lift");
 //
 //
-//        modernRoboticsI2cGyro = hwMap.get(ModernRoboticsI2cGyro.class, "Gyro");
-//        gyro = (IntegratingGyroscope)modernRoboticsI2cGyro;
+        modernRoboticsI2cGyro = hwMap.get(ModernRoboticsI2cGyro.class, "Gyro");
+        gyro = (IntegratingGyroscope)modernRoboticsI2cGyro;
 //        modernRoboticsI2cGyro2 = hwMap.get(ModernRoboticsI2cGyro.class, "Gyro2");
 //        gyro2 = (IntegratingGyroscope)modernRoboticsI2cGyro;
 
+        sensorColor = hwMap.get(ColorSensor.class, "sensorColorDistance");
+        sensorDistance = hwMap.get(DistanceSensor.class, "sensorColorDistance");
+        sensorColor2    = hwMap.get(ColorSensor.class, "sensorColorDistance2");
+        sensorDistance2 = hwMap.get(DistanceSensor.class, "sensorColorDistance2");
+
 //        digitalTouch = hwMap.get(DigitalChannel.class, "MagneticSensor"); // configure as REV Touch Sensor
-//        //digitalTouch.setMode(DigitalChannel.Mode.INPUT);
-
-
+//        digitalTouch.setMode(DigitalChannel.Mode.INPUT);
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         frontRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         backLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         backRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
-        foundationMotor.setDirection(DcMotor.Direction.FORWARD); // Set to Forward
-        linearSlide.setDirection(DcMotor.Direction.FORWARD);
-        claw1.setDirection((Servo.Direction.FORWARD));
-        claw2.setDirection((Servo.Direction.REVERSE));
+        tray.setDirection(DcMotor.Direction.FORWARD); // Set to Forward
+        lift.setDirection(DcMotor.Direction.FORWARD);
+        clawLeft.setDirection((Servo.Direction.FORWARD));
+        clawRight.setDirection((Servo.Direction.REVERSE));
         // Set all motors to zero power
         frontLeft.setPower(0);
         frontRight.setPower(0);
         backLeft.setPower(0);
         backRight.setPower(0);
-        foundationMotor.setPower(0);
-        linearSlide.setPower(0);
-        claw1.setPosition(1);
-        claw2.setPosition(1);
+        tray.setPower(0);
+        lift.setPower(0);
+//        clawLeft.setPosition(0.7);
+//        clawRight.setPosition(0.3);
+//        autoServo.setPosition(0.7);
 //        lift.setPower(0);
 
         // Set all motors to run without encoders.
@@ -163,49 +178,19 @@ public class HardwareAhen2
 
 //        lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-       /* Define and initialize ALL installed servos.
-//        sampling = hwMap.get(Servo.class, "Sampling");
-//        teamMarker = hwMap.get(Servo.class, "TeamMarker");
-//
-//        sampling.setPosition(0);    // These are the values to be tested
-//        teamMarker.setPosition(MARKER_RETRACTED);
-//
-//
-//        // Set up detector
-//        detector = new SamplingOrderDetector(); // Create the detector
-//        detector.init(hwMap.appContext, CameraViewDisplay.getInstance()); // Initialize detector with app context and camera
-//        detector.useDefaults(); // Set detector to use default settings
-//
-//        detector.downscale = 0.4; // How much to downscale the input frames
-      // Optional tuning
-       detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-       //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-       detector.maxAreaScorer.weight = 0.001;
+        float hsvValues[] = {0F, 0F, 0F};
 
-       detector.ratioScorer.weight = 15;
-       detector.ratioScorer.perfectRatio = 1.0;
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
 
-       detector.enable(); // Start detector
-       */
+        // sometimes it helps to multiply the raw RGB values with a scale factor
+        // to amplify/attentuate the measured values.
+        final double SCALE_FACTOR = 255;
 
-
-//        // Set up detector
-//        detector = new GoldAlignDetector(); // Create detector
-//        detector.init(hwMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
-//        detector.useDefaults(); // Set detector to use default settings
-//        // Optional tuning
-//        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
-//        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
-//        detector.downscale = 0.4; // How much to downscale the input frames
-//
-//        detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA; // Can also be PERFECT_AREA
-//        //detector.perfectAreaScorer.perfectArea = 10000; // if using PERFECT_AREA scoring
-//        detector.maxAreaScorer.weight = 0.005; //
-//
-//        detector.ratioScorer.weight = 5; //
-//        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
-//
-//        detector.enable(); // Start the detector!
+        // get a reference to the RelativeLayout so we can change the background
+        // color of the Robot Controller app to match the hue detected by the RGB sensor.
+        int relativeLayoutId = hwMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hwMap.appContext.getPackageName());
+        final View relativeLayout = ((Activity) hwMap.appContext).findViewById(relativeLayoutId);
     }
 }
 

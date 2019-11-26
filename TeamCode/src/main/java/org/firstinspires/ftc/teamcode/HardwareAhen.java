@@ -33,12 +33,17 @@ package org.firstinspires.ftc.teamcode;
 //import com.disnodeteam.dogecv.DogeCV;
 //import com.disnodeteam.dogecv.detectors.roverrukus.GoldAlignDetector;
 //import com.disnodeteam.dogecv.detectors.roverrukus.SamplingOrderDetector;
+import android.app.Activity;
+import android.view.View;
+
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cColorSensor;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -70,6 +75,7 @@ public class HardwareAhen
 
     static final double SERVO_DEPLOYED = 0.5;
     static final double SERVO_RETRACTED = 0;
+
 //
 //    public SamplingOrderDetector detector;
 
@@ -78,15 +84,20 @@ public class HardwareAhen
     public DcMotor  frontRight  = null;
     public DcMotor  backLeft    = null;
     public DcMotor  backRight   = null;
-    public DcMotor  arm       = null;
-    public DcMotor  base        = null;
+    public DcMotor  slideLeft       = null;
+    public DcMotor  slideRight        = null;
     public DcMotor  tray        = null;
+  //  public ModernRoboticsI2cColorSensor colorSensor2= null;
 
 //    //ModernRoboticsI2cRangeSensor range;
     IntegratingGyroscope gyro;
     ModernRoboticsI2cGyro modernRoboticsI2cGyro;
-//    ColorSensor sensorColor;
 
+    ColorSensor sensorColor;
+    DistanceSensor sensorDistance;
+
+    ColorSensor sensorColor2;
+    DistanceSensor sensorDistance2;
 
     ////
 //    IntegratingGyroscope gyro2;
@@ -94,10 +105,11 @@ public class HardwareAhen
 //    //public DigitalChannel digitalTouch;
 //
 //
-    public Servo leftServo = null;
-    public Servo rightServo = null;
-    public Servo grabberServo    = null;
-    public Servo turnerServo     = null;
+       public Servo  armServo           = null;
+       public Servo  clawServo          = null;
+       public CRServo  intakeLeft         = null;
+       public CRServo  intakeRight        = null;
+       public Servo  autoServo          = null;
 
 //      rjberry@rjcontrol.com
 
@@ -121,8 +133,8 @@ public class HardwareAhen
         frontRight = hwMap.get(DcMotor.class, "FrontRight");
         backLeft  = hwMap.get(DcMotor.class, "BackLeft");
         backRight = hwMap.get(DcMotor.class, "BackRight");
-       arm = hwMap.get(DcMotor.class, "Arm");
-        base = hwMap.get(DcMotor.class, "Base");
+        slideLeft = hwMap.get(DcMotor.class, "SlideLeft");
+        slideRight = hwMap.get(DcMotor.class, "SlideRight");
         tray = hwMap.get(DcMotor.class, "Tray");
 
 //        lift = hwMap.get(DcMotor.class, "Lift");
@@ -131,7 +143,10 @@ public class HardwareAhen
         modernRoboticsI2cGyro = hwMap.get(ModernRoboticsI2cGyro.class, "gyro");
         gyro = (IntegratingGyroscope)modernRoboticsI2cGyro;
 //        sensorColor = hwMap.get(ColorSensor.class, "sensor_color");
-
+        sensorColor = hwMap.get(ColorSensor.class, "sensorColorDistance");
+        sensorDistance = hwMap.get(DistanceSensor.class, "sensorColorDistance");
+        sensorColor2    = hwMap.get(ColorSensor.class, "sensorColorDistance2");
+        sensorDistance2 = hwMap.get(DistanceSensor.class, "sensorColorDistance2");
 //        modernRoboticsI2cGyro2 = hwMap.get(ModernRoboticsI2cGyro.class, "Gyro2");
 //        gyro2 = (IntegratingGyroscope)modernRoboticsI2cGyro;
 
@@ -144,8 +159,8 @@ public class HardwareAhen
         frontRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
         backLeft.setDirection(DcMotor.Direction.REVERSE); // Set to REVERSE if using AndyMark motors
         backRight.setDirection(DcMotor.Direction.FORWARD);// Set to FORWARD if using AndyMark motors
-        arm.setDirection(DcMotor.Direction.FORWARD);
-        base.setDirection(DcMotor.Direction.FORWARD);
+        slideLeft.setDirection(DcMotor.Direction.FORWARD);
+        slideRight.setDirection(DcMotor.Direction.FORWARD);
         tray.setDirection(DcMotor.Direction.FORWARD);
 
         // Set all motors to zero power
@@ -153,31 +168,49 @@ public class HardwareAhen
         frontRight.setPower(0);
         backLeft.setPower(0);
         backRight.setPower(0);
-        arm.setPower(0);
-        base.setPower(0);
+        slideLeft.setPower(0);
+        slideRight.setPower(0);
         tray.setPower(0);
-
         // Set all motors to run without encoders.
         // May want to use RUN_USING_ENCODERS if encoders are installed.
         frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        base.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        slideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         tray.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 //         Define and initialize ALL installed servos.
-        leftServo = hwMap.get(Servo.class, "leftServo");
-        rightServo = hwMap.get(Servo.class, "rightServo");
-        turnerServo = hwMap.get(Servo.class, "turnerServo");
-        grabberServo = hwMap.get(Servo.class, "grabberServo");
+
+        armServo    = hwMap.get(Servo.class,"armServo");
+        clawServo   = hwMap.get(Servo.class,"clawServo");
+        intakeLeft  = hwMap.get(CRServo.class,"intakeLeft");
+        intakeRight = hwMap.get(CRServo.class,"intakeRight");
+        autoServo   = hwMap.get(Servo.class, "autoServo");
+
+        intakeLeft.setDirection(CRServo.Direction.REVERSE);
+        intakeRight.setDirection(CRServo.Direction.FORWARD);
+
+        armServo.setPosition(0.5);
+        clawServo.setPosition(0);
+        autoServo.setPosition(1);
 
 //
-        rightServo.setPosition(0.525);    // These are the values to be tested
-        leftServo.setPosition(-1);
-        turnerServo.setPosition(0.5);
-        grabberServo.setPosition(0);
 //
+//
+        float hsvValues[] = {0F, 0F, 0F};
+
+        // values is a reference to the hsvValues array.
+        final float values[] = hsvValues;
+
+        // sometimes it helps to multiply the raw RGB values with a scale factor
+        // to amplify/attentuate the measured values.
+        final double SCALE_FACTOR = 255;
+
+        // get a reference to the RelativeLayout so we can change the background
+        // color of the Robot Controller app to match the hue detected by the RGB sensor.
+        int relativeLayoutId = hwMap.appContext.getResources().getIdentifier("RelativeLayout", "id", hwMap.appContext.getPackageName());
+        final View relativeLayout = ((Activity) hwMap.appContext).findViewById(relativeLayoutId);
 //
 //        // Set up detector
 //        detector = new SamplingOrderDetector(); // Create the detector

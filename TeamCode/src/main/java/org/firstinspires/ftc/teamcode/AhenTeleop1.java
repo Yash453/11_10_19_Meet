@@ -29,8 +29,11 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.Servo;
 
 /**
  * This OpMode uses the common Pushbot hardware class to define the devices on the robot.
@@ -47,7 +50,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
  */
 
 @TeleOp(name="Ahen Main", group="Neha")
-// @Disabled
+@Disabled
 public class AhenTeleop1 extends LinearOpMode {
 
     final double CLAW_SPEED = 0.02;                   // sets rate to move servo
@@ -91,56 +94,47 @@ public class AhenTeleop1 extends LinearOpMode {
             robot.backLeft.setPower(wheels.backLeft);
             robot.backRight.setPower(wheels.backRight);
 
-            if (!gamepad2.dpad_up && !gamepad2.dpad_down)
-                robot.base.setPower(0);
-            else if (gamepad2.dpad_up)
-                robot.base.setPower(.5);
-            else if (gamepad2.dpad_down)
-                robot.base.setPower(-.5);
+            if (!gamepad1.left_bumper && !gamepad1.right_bumper) {
+                robot.intakeLeft.setPower(0);
+                robot.intakeRight.setPower(0);
+            }
+            else if (gamepad1.right_bumper) {
+                robot.intakeRight.setPower(1);
+                robot.intakeLeft.setPower(1);
+            }
+            else if (gamepad1.left_bumper){
+                robot.intakeLeft.setPower(-1);
+                robot.intakeRight.setPower(-1);
+            }
+            if (gamepad2.a) {
+                robot.clawServo.setPosition(1);
+            }
+            else if (gamepad2.b){
+                robot.clawServo.setPosition(0);
+            }
+            if (!gamepad2.dpad_up && !gamepad2.dpad_down) {
+                robot.slideLeft.setPower(0);
+                robot.slideRight.setPower(0);
+            }
+            else if (gamepad2.dpad_down) {
+                robot.slideRight.setPower(-1);
+                robot.slideLeft.setPower(-1);
+            }
+            else if (gamepad2.dpad_up) {
+                robot.slideRight.setPower(1);
+                robot.slideLeft.setPower(1);
+            }
 
-            if (!gamepad2.dpad_right && !gamepad2.dpad_left)
-                robot.arm.setPower(0);
-            else if (gamepad2.dpad_left)
-                robot.arm.setPower(-2);
-            else if (gamepad2.dpad_right)
-                robot.arm.setPower(2);
-
-            if (!gamepad2.right_bumper && !gamepad2.left_bumper)
-                robot.tray.setPower(0);
+            if (gamepad2.left_bumper)
+                robot.armServo.setPosition(1);
             else if (gamepad2.right_bumper)
-                robot.tray.setPower(0.6);
-            else if (gamepad2.left_bumper)
-                robot.tray.setPower(-0.6);
+                robot.armServo.setPosition(0);
 
-//            if (gamepad1.b)
-            //              robot.turnerServo.setPosition(1);
-//
-            //          if (gamepad1.x)
-            //            robot.grabberServo.setPosition(0);
+            if (gamepad2.x)
+                robot.autoServo.setPosition(0.3);
+            else if (gamepad2.y)
+                robot.autoServo.setPosition(0.7);
 
-
-            if (gamepad2.y)
-                robot.grabberServo.setPosition(0);
-            else if (gamepad2.a)
-                robot.grabberServo.setPosition(0.5);
-
-            // if (!gamepad1.y && !gamepad1.a)
-            //    robot.grabberServo.setPosition( 0.5);
-            //else if (gamepad1.a)
-            //  robot.grabberServo.setPosition( 0.2);
-            //else if (gamepad1.y)
-            //  robot.grabberServo.setPosition( 0.7);
-
-//
-            //  if (gamepad1.b)
-            //    robot.turnerServo.setPosition( 0.2);
-            //else if (gamepad1.x)
-            //  robot.turnerServo.setPosition(0.7);
-
-            if (gamepad1.x)
-                robot.turnerServo.setPosition(1);
-            else if (gamepad1.b)
-                robot.turnerServo.setPosition(0.42);
         }
     }
 }

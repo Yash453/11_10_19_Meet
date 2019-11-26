@@ -100,11 +100,11 @@ public class RedbotServo extends LinearOpMode {
                 while (opModeIsActive() && gamepad1.a) {
                     print();
                     if (gamepad1.dpad_up) {
-                        robot.leftServo.setPosition(robot.leftServo.getPosition() + precision);
+                        robot.armServo.setPosition(robot.armServo.getPosition() + precision);
                         sleep(delay);
                     }
                     if (gamepad1.dpad_down) {
-                        robot.leftServo.setPosition(robot.leftServo.getPosition() - precision);
+                        robot.armServo.setPosition(robot.armServo.getPosition() - precision);
                         sleep(delay);
                     }
                 }
@@ -121,7 +121,7 @@ public class RedbotServo extends LinearOpMode {
     {
         telemetry.addData("precision", precision);
         telemetry.addData("delay", delay);
-        telemetry.addData("a - sampling", robot.leftServo.getPosition());
+        telemetry.addData("a - sampling", robot.armServo.getPosition());
       //  telemetry.addData("y - teamMarker", robot.teamMarker.getPosition());
         // Add more telemetry here if more servos are needed.
 

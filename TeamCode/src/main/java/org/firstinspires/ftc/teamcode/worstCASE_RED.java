@@ -69,9 +69,9 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Foundation Auto Red", group="Yash")
+@Autonomous(name="Auto WORST CASE", group="Yash")
 //@Disabled
-public class AhenAutoGyroRED extends LinearOpMode {
+public class worstCASE_RED extends LinearOpMode {
 
     /* Declare OpMode members. */
     HardwareAhen2         robot   = new HardwareAhen2();   // Use a Pushbot's hardware
@@ -104,7 +104,7 @@ public class AhenAutoGyroRED extends LinearOpMode {
     static final double SERVO_RETRACTED = 0;
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
 
         /*
          * Initialize the standard drive system variables.
@@ -151,61 +151,19 @@ public class AhenAutoGyroRED extends LinearOpMode {
         }
 
         robot.modernRoboticsI2cGyro.resetZAxisIntegrator();
-        robot.tray.setPower(0);
-        robot.tray.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        sleep(50);
+
+        // Step through each leg of the path,
+        // Note: Reverse movement is obtained by setting a negative distance (not speed)
+        // Put a hold after each turn
+
+//        gyroStrafeLeft(DRIVE_SPEED, 12, 0);
+//        gyroHold(0, 0, 0.2);
+
         robot.tray.setMode(DcMotor.RunMode.RUN_USING_ENCODER); //RESET ENCODERS
 
-
-        encoderDrive(DRIVE_SPEED, 34, 34.0,10);    // Drive FWD 36.5 inches
-//        gyroTurn( TURN_SPEED, 0);         // Turn  CCW to -0 Degrees
+        gyroDrive(DRIVE_SPEED, 42, 0.0);    // Drive FWD 36.5 inches
+        gyroTurn( TURN_SPEED, 0);         // Turn  CCW to -0 Degrees
         gyroHold( TURN_SPEED, 0, 0.2);    // Hold -45 Deg heading for a 1/2 second
-        double halfTurn = 1120/2;
-        robot.tray.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.tray.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        int trayTarget = robot.tray.getCurrentPosition() + (int)halfTurn;
-        robot.tray.setTargetPosition(trayTarget);
-        robot.tray.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtime.reset();
-        robot.tray.setPower(1);
-        while (robot.tray.isBusy()){
-            telemetry.addData("Status", "Running half turn");
-            telemetry.update();
-        }
-        robot.tray.setPower(0);
-        robot.tray.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-
-        encoderDrive(DRIVE_SPEED, -34,-34, 10);  // Drive FWD 12 inches at 45 degrees
-        gyroTurn( TURN_SPEED,  0);         // Turn  CW  to  45 Degrees
-        gyroHold( TURN_SPEED,  0, 0.1);    // Hold  45 Deg heading for a 1/2 second
-
-
-
-        encoderDrive(TURN_SPEED,   60, -60, 3.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
-        robot.tray.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.tray.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        int newTarget = robot.tray.getCurrentPosition() - (int)halfTurn;
-        robot.tray.setTargetPosition(newTarget);
-        robot.tray.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        runtime.reset();
-        robot.tray.setPower(1);
-
-        while (robot.tray.isBusy()){
-            telemetry.addData("Status", "Running half turn");
-            telemetry.update();
-        }
-        robot.tray.setPower(0);
-        robot.tray.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        encoderDrive(DRIVE_SPEED,-7,-7, 3.0);
-
-        encoderDrive(DRIVE_SPEED,-40,40,2.9);
-
-        encoderDrive(DRIVE_SPEED, 38, 38, 2.9);
-
-        telemetry.addData("Path", "Complete");
-        telemetry.update();
 
         sleep(2000);
     }
@@ -729,83 +687,5 @@ public class AhenAutoGyroRED extends LinearOpMode {
 
             sleep(250);   // optional pause after each move
         }
-    }
-    public void encoderStrafeRight(double speed, double revolutions, double timeoutS) throws InterruptedException{
-
-        int newFrontRightTarget = robot.frontRight.getCurrentPosition() - (int)(revolutions * COUNTS_PER_MOTOR_REV);
-        int newBackRightTarget = robot.backRight.getCurrentPosition() + (int)(revolutions * COUNTS_PER_MOTOR_REV);
-
-        robot.frontLeft.setTargetPosition(newBackRightTarget);
-        robot.frontRight.setTargetPosition(newFrontRightTarget);
-        robot.backLeft.setTargetPosition(newFrontRightTarget);
-        robot.backRight.setTargetPosition(newBackRightTarget);
-
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        robot.frontLeft.setPower(-speed);
-        robot.frontRight.setPower(speed);
-        robot.backLeft.setPower(speed);
-        robot.backRight.setPower(-speed);
-
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeft.isBusy() && robot.frontRight.isBusy()
-                && robot.backLeft.isBusy() && robot.backRight.isBusy()) {
-            // Display it for the driver.
-            telemetry.addData("Path1",  "Running to %7d", newFrontRightTarget);
-            telemetry.addData("Path2",  "Running at %7d", robot.frontLeft.getCurrentPosition());
-            telemetry.update();
-        }
-
-        robot.frontLeft.setPower(0);
-        robot.frontRight.setPower(0);
-        robot.backLeft.setPower(0);
-        robot.backRight.setPower(0);
-
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-    }
-    public void encoderStrafeLeft(double speed, double revolutions, double timeoutS) throws InterruptedException{
-
-        int newFrontLeftTarget = robot.frontLeft.getCurrentPosition() - (int)(revolutions * COUNTS_PER_MOTOR_REV);
-        int newBackLeftTarget = robot.backLeft.getCurrentPosition() + (int)(revolutions * COUNTS_PER_MOTOR_REV);
-
-        robot.frontLeft.setTargetPosition(newFrontLeftTarget);
-        robot.frontRight.setTargetPosition(newBackLeftTarget);
-        robot.backLeft.setTargetPosition(newBackLeftTarget);
-        robot.backRight.setTargetPosition(newFrontLeftTarget);
-
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        robot.frontLeft.setPower(-speed);
-        robot.frontRight.setPower(speed);
-        robot.backLeft.setPower(speed);
-        robot.backRight.setPower(-speed);
-
-        runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < timeoutS) && robot.frontLeft.isBusy() && robot.frontRight.isBusy()
-                && robot.backLeft.isBusy() && robot.backRight.isBusy()) {
-            // Display it for the driver.
-            telemetry.addData("Path1",  "Running to %7d", newFrontLeftTarget);
-            telemetry.addData("Path2",  "Running at %7d", robot.frontLeft.getCurrentPosition());
-            telemetry.update();
-        }
-
-        robot.frontLeft.setPower(0);
-        robot.frontRight.setPower(0);
-        robot.backLeft.setPower(0);
-        robot.backRight.setPower(0);
-
-        robot.frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 }
