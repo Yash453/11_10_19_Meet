@@ -53,7 +53,7 @@ import java.util.Locale;
  * Remove or comment out the @Disabled line to add this opmode to the Driver Station OpMode list.
  */
 @TeleOp(name = "Sensor: REVColorDistance", group = "Sensor")
-@Disabled                            // Comment this out to add to the opmode list
+//@Disabled                            // Comment this out to add to the opmode list
 public class SensorREVColorDistance extends LinearOpMode {
 
     /**
@@ -86,22 +86,33 @@ public class SensorREVColorDistance extends LinearOpMode {
      *
      */
     ColorSensor sensorColor;
+    ColorSensor sensorColor2;
     DistanceSensor sensorDistance;
+    DistanceSensor sensorDistance2;
 
     @Override
     public void runOpMode() {
 
         // get a reference to the color sensor.
-        sensorColor = hardwareMap.get(ColorSensor.class, "sensor_color_distance");
+        sensorColor = hardwareMap.get(ColorSensor.class, "sensorColorDistance");
+        sensorColor2 = hardwareMap.get(ColorSensor.class, "sensorColorDistance2");
+
 
         // get a reference to the distance sensor that shares the same name.
-        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensor_color_distance");
+        sensorDistance = hardwareMap.get(DistanceSensor.class, "sensorColorDistance");
+        sensorDistance2 = hardwareMap.get(DistanceSensor.class, "sensorColorDistance2");
+
 
         // hsvValues is an array that will hold the hue, saturation, and value information.
         float hsvValues[] = {0F, 0F, 0F};
 
+        float hsvValues2[] = {0F, 0F, 0F};
+
+
         // values is a reference to the hsvValues array.
         final float values[] = hsvValues;
+        final float values2[] = hsvValues;
+
 
         // sometimes it helps to multiply the raw RGB values with a scale factor
         // to amplify/attentuate the measured values.
@@ -134,6 +145,20 @@ public class SensorREVColorDistance extends LinearOpMode {
             telemetry.addData("Green", sensorColor.green());
             telemetry.addData("Blue ", sensorColor.blue());
             telemetry.addData("Hue", hsvValues[0]);
+
+            Color.RGBToHSV((int) (sensorColor2.red() * SCALE_FACTOR),
+                    (int) (sensorColor2.green() * SCALE_FACTOR),
+                    (int) (sensorColor2.blue() * SCALE_FACTOR),
+                    hsvValues2);
+
+            // send the info back to driver station using telemetry function.
+            telemetry.addData("Distance (cm)",
+                    String.format(Locale.US, "%.02f", sensorDistance2.getDistance(DistanceUnit.CM)));
+            telemetry.addData("Alpha", sensorColor2.alpha());
+            telemetry.addData("Red  ", sensorColor2.red());
+            telemetry.addData("Green", sensorColor2.green());
+            telemetry.addData("Blue ", sensorColor2.blue());
+            telemetry.addData("Hue", hsvValues2[0]);
 
             // change the background color to match the color detected by the RGB sensor.
             // pass a reference to the hue, saturation, and value array as an argument

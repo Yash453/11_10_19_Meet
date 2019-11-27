@@ -53,7 +53,7 @@
 //    final double    CLAW_SPEED      = 0.02 ;                   // sets rate to move servo
 //
 //    /* Declare OpMode members. */
-////    HardwareIbha robot = new HardwareIbha();   // Use a Redbot's hardware
+//    HardwareRedbot robot = new HardwareRedbot();   // Use a Redbot's hardware
 //
 //    double target = 0;
 //    double SERVO_SPEED = .1;
